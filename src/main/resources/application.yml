@@ -1,0 +1,19 @@
+Spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: e_com
+      auto-index-creation: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+
+
+jwt:
+  secret: mysecretkeymysecretkeymysecretkey
+  expiration: 3600000
+
