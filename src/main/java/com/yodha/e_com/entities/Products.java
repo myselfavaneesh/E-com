@@ -1,5 +1,6 @@
 package com.yodha.e_com.entities;
 
+import jdk.jfr.Category;
 import lombok.Data;
 import lombok.NonNull;
 import org.bson.types.ObjectId;
@@ -13,18 +14,14 @@ import java.util.List;
 @Document(collection = "products")
 @Data
 public class Products {
-
     @Id
     private ObjectId id;
-    @NonNull
     private String name;
-    @NonNull
     private String description;
-    private int price;
+    private double price;
     private int stock;
     @DBRef
-    private Category category;
+    private ProductCategory category;
     private List<String> images;
 }
-
 

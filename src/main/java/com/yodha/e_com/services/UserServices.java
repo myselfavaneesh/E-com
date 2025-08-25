@@ -1,6 +1,9 @@
 package com.yodha.e_com.services;
 
+import com.yodha.e_com.dto.UsersRequest;
 import com.yodha.e_com.entities.Users;
+import com.yodha.e_com.exception.ResourceNotFoundException;
+import com.yodha.e_com.mapper.UserMapper;
 import com.yodha.e_com.repository.UserRepo;
 import com.yodha.e_com.security.AppUserDetails;
 import com.yodha.e_com.utils.JWTUtility;
@@ -13,18 +16,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.stereotype.Service;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-@Component
+
+@Service
 public class UserServices {
 
     @Autowired
@@ -39,21 +36,19 @@ public class UserServices {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserMapper usersMapper;
 
 
-    public ResponseEntity<String> createUser(Users user){
-        try{
-            if (userRepo.existsByEmail(user.getEmail())) {
-                return ResponseEntity.badRequest()
-                        .body("Error: Email is already taken!");
-            }
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public void createUser(UsersRequest request){
+            userRepo.findByEmail(request.getEmail()).ifPresent(user -> {
+                throw new ResourceNotFoundException("Email is already in use!");
+            });
+
+            Users user = usersMapper.toUsers(request);
+
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
             userRepo.save(user);
-            return ResponseEntity.ok("User registered successfully!");
-        }catch (Exception e){
-            return ResponseEntity.badRequest()
-                        .body("Error: " + e.getMessage());
-        }
     }
 
     public ResponseEntity<?> loginUser(String email, String password) {

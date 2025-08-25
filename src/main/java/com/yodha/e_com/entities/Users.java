@@ -14,14 +14,14 @@ import java.util.List;
 public class Users {
     @Id
     private ObjectId id;
+
     @Indexed(unique = true)
-    @NonNull
     private String email;
-    @NonNull
+
     private String name;
-    @NonNull
+
     private String password;
-    @NonNull
+
     private List<String> roles;
 }
 

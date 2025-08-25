@@ -1,9 +1,14 @@
 package com.yodha.e_com.controller;
 
 
-import com.yodha.e_com.entities.LoginRequest;
+import com.yodha.e_com.dto.LoginRequest;
+import com.yodha.e_com.dto.ProductResponse;
+import com.yodha.e_com.dto.UsersRequest;
 import com.yodha.e_com.entities.Users;
 import com.yodha.e_com.services.UserServices;
+import com.yodha.e_com.utils.ApiResponse;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +26,16 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<String> register(@RequestBody Users user){
-        return userServices.createUser(user);
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UsersRequest request){
+        userServices.createUser(request);
+
+        ApiResponse<String> response = new ApiResponse<>(
+                true,
+                "Account created successfully!",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PostMapping("/login")
