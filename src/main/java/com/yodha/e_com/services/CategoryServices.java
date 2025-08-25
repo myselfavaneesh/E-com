@@ -4,7 +4,6 @@ import com.yodha.e_com.dto.CategoryRequest;
 import com.yodha.e_com.entities.ProductCategory;
 import com.yodha.e_com.mapper.CategoryMapper;
 import com.yodha.e_com.repository.ProductCategoryRepo;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

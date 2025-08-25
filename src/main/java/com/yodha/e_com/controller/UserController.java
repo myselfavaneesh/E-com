@@ -2,9 +2,7 @@ package com.yodha.e_com.controller;
 
 
 import com.yodha.e_com.dto.LoginRequest;
-import com.yodha.e_com.dto.ProductResponse;
 import com.yodha.e_com.dto.UsersRequest;
-import com.yodha.e_com.entities.Users;
 import com.yodha.e_com.services.UserServices;
 import com.yodha.e_com.utils.ApiResponse;
 import jakarta.validation.Valid;
