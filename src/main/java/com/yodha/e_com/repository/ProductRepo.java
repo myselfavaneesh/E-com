@@ -4,8 +4,6 @@ import com.yodha.e_com.entities.ProductCategory;
 import com.yodha.e_com.entities.Products;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.data.mongodb.repository.Update;
 
 import java.util.List;
 
