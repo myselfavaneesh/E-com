@@ -1,60 +1,42 @@
-# E-com
+# E-com: Spring Boot E-commerce API
 
-E-com is an e-commerce backend application built using Java and Spring Boot. It provides APIs and services for managing products, categories, and users, with secure authentication and authorization. The project follows modern practices for building scalable and maintainable applications, leveraging MongoDB as the database.
+A Java Spring Boot-based e-commerce backend with MongoDB, JWT authentication, and modular architecture.
 
-## Features
+## Prerequisites
 
-- **User Management**
-  - Create, update, and authenticate users
-  - Password encryption and JWT-based authentication
-  - Secure endpoints for user operations
-
-- **Product Management**
-  - Add, update, delete, and fetch products
-  - Filter products by category and price range
-  - Entity mapping and DTOs for clean data handling
-
-- **Category Management**
-  - CRUD operations for product categories
-  - Category-based product filtering
-
-- **Security**
-  - Spring Security integration
-  - JWT-based stateless authentication
-  - Role-based access for endpoints
-
-## Technologies Used
-
-- Java
-- Spring Boot
-- Spring Data MongoDB
-- Spring Security (with JWT)
-- JUnit for testing
-- Lombok
-- MongoDB
+- Java 17 or higher
+- Maven 3.6+
+- MongoDB (running locally or accessible remotely)
 
 ## Getting Started
 
 1. **Clone the repository**
    ```bash
    git clone https://github.com/myselfavaneesh/E-com.git
+   cd E-com
    ```
 
-2. **Install MongoDB** and ensure it is running locally.
+2. **Install MongoDB** and ensure it is running locally or update the connection string for remote access.
 
 3. **Configure application properties**
-   - Add your MongoDB connection details and JWT secret to `application.properties`.
+   - Edit `src/main/resources/application.yml` to set your MongoDB connection details and JWT secret.
 
 4. **Build and Run**
-   ```bash
-   ./mvnw spring-boot:run
-   ```
+   - On Unix/macOS:
+     ```bash
+     ./mvnw spring-boot:run
+     ```
+   - On Windows:
+     ```cmd
+     mvnw spring-boot:run
+     ```
 
 ## API Overview
 
 - `/auth/user` - User authentication and update endpoints
 - `/product` - Product CRUD and listing endpoints
 - `/categories` - Category CRUD endpoints
+- `/cart` - Cart management endpoints
 
 ## Project Structure
 
@@ -66,10 +48,17 @@ E-com is an e-commerce backend application built using Java and Spring Boot. It 
 - `utils/` - Utility classes (e.g. JWT utility, API response wrapper)
 - `config/` - Security configuration
 
+## Running Tests
+
+Run all tests with:
+```bash
+./mvnw test
+```
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit pull requests.
 
 ## License
 
-This project currently does not specify a license.
+This project currently does not specify a license. Consider adding one (e.g., MIT, Apache 2.0) for open source use.
