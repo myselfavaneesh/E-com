@@ -53,6 +53,4 @@ public class CartController {
         CartResponseDto removedItem = cartService.removeItemFromCart(Email, productId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cart Item Removed", removedItem));
     }
-
-
 }
