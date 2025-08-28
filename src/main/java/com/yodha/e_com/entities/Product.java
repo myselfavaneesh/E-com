@@ -9,7 +9,7 @@ import java.util.List;
 
 @Document(collection = "products")
 @Data
-public class Products {
+public class Product {
     @Id
     private ObjectId id;
     private String name;

@@ -1,11 +1,10 @@
 package com.yodha.e_com.services;
 
-import com.yodha.e_com.dto.CartItemResponseDto;
 import com.yodha.e_com.dto.CartRequestDto;
 import com.yodha.e_com.dto.CartResponseDto;
 import com.yodha.e_com.entities.Cart;
 import com.yodha.e_com.entities.CartItem;
-import com.yodha.e_com.entities.Products;
+import com.yodha.e_com.entities.Product;
 import com.yodha.e_com.exception.ResourceNotFoundException;
 import com.yodha.e_com.mapper.CartMapper;
 import com.yodha.e_com.repository.CartRepo;
@@ -33,7 +32,7 @@ public class CartService {
 
     public CartResponseDto createCart(String email, CartRequestDto cartRequestDto) {
         List<CartItem> incomingItems = cartRequestDto.getCartItems().stream().map(itemDto -> {
-            Products product = productRepo.findById(itemDto.getProductId())
+            Product product = productRepo.findById(itemDto.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemDto.getProductId()));
 
             CartItem cartItem = new CartItem();

@@ -32,11 +32,10 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = null;
-        String username = null;
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
+        // Try to get JWT from cookie
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
                 if ("JWT-TOKEN".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
@@ -44,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-
+        // If not found in cookie, try Authorization header
         if (token == null) {
             String header = request.getHeader("Authorization");
             if (header != null && header.startsWith("Bearer ")) {
@@ -52,28 +51,21 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-
         if (token != null && jwtUtil.validateToken(token)) {
-            username = jwtUtil.extractUsername(token);
-
+            String username = jwtUtil.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-
                 List<String> roles = jwtUtil.extractRoles(token);
-
-                List<SimpleGrantedAuthority> authorities = roles != null ?
-                        roles.stream()
-                                .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList()) :
-                        userDetails.getAuthorities().stream()
-                                .map(auth -> new SimpleGrantedAuthority(auth.getAuthority()))
-                                .collect(Collectors.toList());
+                List<SimpleGrantedAuthority> authorities = (roles != null)
+                        ? roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+                        : userDetails.getAuthorities().stream()
+                        .map(auth -> new SimpleGrantedAuthority(auth.getAuthority()))
+                        .collect(Collectors.toList());
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-
 
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
@@ -83,5 +75,3 @@ public class JwtFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 }
-
-

@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class CartRequestDto {
     @NotEmpty(message = "Cart must have at least one item")
-    private List<CartItemRequestDto> cartItems;
+    private List<ItemRequestDto> cartItems;
 }

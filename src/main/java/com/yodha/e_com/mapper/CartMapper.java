@@ -1,19 +1,16 @@
 package com.yodha.e_com.mapper;
 
-import com.yodha.e_com.dto.CartItemRequestDto;
-import com.yodha.e_com.dto.CartItemResponseDto;
+import com.yodha.e_com.dto.ItemRequestDto;
 import com.yodha.e_com.dto.CartResponseDto;
 import com.yodha.e_com.entities.Cart;
 import com.yodha.e_com.entities.CartItem;
 import org.mapstruct.*;
 
-import java.util.List;
-
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {
 
-    CartItem toEntity(CartItemRequestDto dto);
+    CartItem toEntity(ItemRequestDto dto);
 
 
     CartResponseDto toCartResponseDto(Cart cart);
@@ -25,4 +22,5 @@ public interface CartMapper {
                 .sum();
         cart.setTotalPrice(total);
     }
+
 }

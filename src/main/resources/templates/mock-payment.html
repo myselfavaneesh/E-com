@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>SecurePay - Mock Payment Gateway</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .amount {
+            color: #28a745;
+            font-size: 24px !important;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            margin: 30px 0;
+            border: none;
+        }
+
+        .action-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .payment-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .success-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .success-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .fail-btn {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+            color: white;
+        }
+
+        .fail-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .security-info {
+            margin-top: 30px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .security-icon {
+            color: #007bff;
+            margin-right: 8px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal.success .modal-content {
+            border-left: 5px solid #28a745;
+        }
+
+        .modal.failed .modal-content {
+            border-left: 5px solid #dc3545;
+        }
+
+        .modal-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .developer-credit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .developer-credit p {
+            color: #555;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .github-link:hover {
+            background: #333;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .github-icon {
+            font-size: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .payment-container {
+                padding: 30px 20px;
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .payment-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            .developer-credit {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="payment-container">
+    <div class="header">
+        <div class="logo pulse">💳</div>
+        <h1>SecurePay Gateway</h1>
+        <p class="subtitle">Complete your payment securely</p>
+    </div>
+
+    <div class="payment-details">
+        <div class="detail-item">
+            <span class="detail-label">Payment ID</span>
+            <span class="detail-value" th:text="${paymentId}">PAY123456</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Order ID</span>
+            <span class="detail-value" th:text="${orderId}">ORD789012</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Amount</span>
+            <span class="detail-value amount">₹<span th:text="${amount}">1,299</span></span>
+        </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="action-section">
+        <h3>🔄 Simulate Payment Outcome</h3>
+        <div class="button-container">
+            <button class="payment-btn success-btn" id="successBtn" onclick="processPayment('success')">
+                <span class="btn-text">✅ Success</span>
+                <span class="loading-spinner" style="display: none;"><span class="loading"></span> Processing...</span>
+            </button>
+            <button class="payment-btn fail-btn" id="failBtn" onclick="processPayment('fail')">
+                <span class="btn-text">❌ Failure</span>
+                <span class="loading-spinner" style="display: none;"><span class="loading"></span> Processing...</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="security-info">
+        <span class="security-icon">🔒</span>
+        This is a mock payment gateway for testing purposes only.
+        No real transactions will be processed.
+    </div>
+</div>
+
+<!-- Developer Credit Footer -->
+<div class="footer">
+    <div class="developer-credit">
+        <p>Developed by</p>
+        <a class="github-link" href="https://github.com/myselfavaneesh" target="_blank">
+            <svg class="github-icon" fill="currentColor" height="16" viewBox="0 0 16 16" width="16"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+            </svg>
+            <span>Avaneesh Jaiswal (AJ)</span>
+        </a>
+    </div>
+</div>
+
+<!-- Modal for Payment Result -->
+<div class="modal" id="paymentModal">
+    <div class="modal-content">
+        <div class="modal-icon" id="modalIcon"></div>
+        <h2 id="modalTitle"></h2>
+        <p><strong>Payment ID:</strong> <span th:text="${paymentId}">PAY123456</span></p>
+        <p><strong>Order ID:</strong> <span th:text="${orderId}">ORD789012</span></p>
+        <p><strong>Amount:</strong> ₹<span th:text="${amount}">1,299</span></p>
+        <p id="modalMessage"></p>
+        <p><small>This window will close automatically in <span id="countdown">3</span> seconds...</small></p>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var paymentId = /*[[${paymentId}]]*/ 'PAY123456';
+    var orderId = /*[[${orderId}]]*/ 'ORD789012';
+    var amount = /*[[${amount}]]*/ '1299';
+
+    function processPayment(type) {
+        // Disable both buttons
+        const successBtn = document.getElementById('successBtn');
+        const failBtn = document.getElementById('failBtn');
+
+        successBtn.disabled = true;
+        failBtn.disabled = true;
+
+        // Show loading state for clicked button
+        const clickedBtn = type === 'success' ? successBtn : failBtn;
+        clickedBtn.querySelector('.btn-text').style.display = 'none';
+        clickedBtn.querySelector('.loading-spinner').style.display = 'inline-block';
+
+        // Make AJAX call to your API endpoint
+        fetch('/api/v1/payments/callback/' + paymentId + '/' + type, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                clickedBtn.querySelector('.btn-text').style.display = 'inline-block';
+                clickedBtn.querySelector('.loading-spinner').style.display = 'none';
+
+                // Show result modal
+                showResultModal(data.success, data.message || (data.success ? 'Payment completed successfully!' : 'Payment failed. Please try again.'));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+
+                // Hide loading state
+                clickedBtn.querySelector('.btn-text').style.display = 'inline-block';
+                clickedBtn.querySelector('.loading-spinner').style.display = 'none';
+
+                // Show error modal
+                showResultModal(false, 'Network error. Please check your connection and try again.');
+            });
+    }
+
+    function showResultModal(isSuccess, message) {
+        const modal = document.getElementById('paymentModal');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        if (isSuccess) {
+            modal.className = 'modal success';
+            modalIcon.textContent = '✅';
+            modalTitle.textContent = 'Payment Successful';
+            modalTitle.style.color = '#28a745';
+        } else {
+            modal.className = 'modal failed';
+            modalIcon.textContent = '❌';
+            modalTitle.textContent = 'Payment Failed';
+            modalTitle.style.color = '#dc3545';
+        }
+
+        modalMessage.textContent = message;
+        modal.style.display = 'block';
+
+        // Send message to parent window if this is in an iframe/popup
+        if (window.opener) {
+            window.opener.postMessage({
+                status: isSuccess ? 'SUCCESS' : 'FAILED',
+                message: message,
+                orderId: orderId,
+                amount: amount,
+                paymentId: paymentId
+            }, "*");
+        }
+
+        // Start countdown and auto-close
+        startCountdown();
+    }
+
+    function startCountdown() {
+        let seconds = 3;
+        const countdownElement = document.getElementById('countdown');
+
+        const countdownInterval = setInterval(function () {
+            seconds--;
+            countdownElement.textContent = seconds;
+
+            if (seconds <= 0) {
+                clearInterval(countdownInterval);
+                // Close window - this will work for popups, new tabs, or redirect for main window
+                try {
+                    window.close();
+                } catch (e) {
+                    // If window.close() fails (for main window), redirect to home
+                    window.location.href = '/';
+                }
+
+                // Alternative approach - force close after timeout
+                setTimeout(function() {
+                    if (window.opener) {
+                        window.close();
+                    } else {
+                        // For main browser windows, redirect to home page
+                        window.location.href = '/';
+                    }
+                }, 100);
+            }
+        }, 1000);
+    }
+
+    // Alternative auto-close using setTimeout (backup method)
+    function autoCloseWindow() {
+        setTimeout(function() {
+            try {
+                window.close();
+            } catch (e) {
+                console.log('Cannot close main window, redirecting instead');
+                window.location.href = '/';
+            }
+        }, 3000);
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function (event) {
+        const modal = document.getElementById('paymentModal');
+        if (event.target === modal) {
+            try {
+                window.close();
+            } catch (e) {
+                window.location.href = '/';
+            }
+        }
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

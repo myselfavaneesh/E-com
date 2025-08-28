@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Result - SecurePay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Success Background */
+        .success-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Failure Background */
+        .failure-bg {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .result-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 50px 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .result-container.failed::before {
+            background: linear-gradient(90deg, #dc3545, #e74c3c);
+        }
+
+        .status-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .success-icon {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 15px 35px rgba(40, 167, 69, 0.3);
+        }
+
+        .failed-icon {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+            color: white;
+            box-shadow: 0 15px 35px rgba(220, 53, 69, 0.3);
+        }
+
+        .result-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .success-title {
+            color: #28a745;
+        }
+
+        .failed-title {
+            color: #dc3545;
+        }
+
+        .result-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .payment-summary {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            border-left: 5px solid #28a745;
+        }
+
+        .payment-summary.failed {
+            border-left-color: #dc3545;
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 16px;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .summary-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .amount-value {
+            font-size: 24px;
+            color: #28a745;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .success-badge {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+
+        .failed-badge {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .transaction-id {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .auto-close-notice {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #004085;
+        }
+
+        .countdown {
+            font-weight: 700;
+            color: #dc3545;
+        }
+
+        .footer-info {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        /* Developer Footer Styles */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+        }
+
+        .developer-credit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .developer-credit p {
+            color: #555;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #333;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .github-link:hover {
+            background: #333;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .github-icon {
+            font-size: 16px;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .success-icon {
+            animation: bounceIn 0.8s ease-out, pulse 2s infinite 1s;
+        }
+
+        @media (max-width: 768px) {
+            .result-container {
+                padding: 40px 25px;
+            }
+
+            .result-title {
+                font-size: 28px;
+            }
+
+            .status-icon {
+                width: 100px;
+                height: 100px;
+                font-size: 50px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .developer-credit {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body th:class="${success != null and success ? 'success-bg' : 'failure-bg'}">
+<div class="result-container" th:classappend="${success != null and success ? 'success' : 'failed'}">
+    <!-- Status Icon -->
+    <div class="status-icon" th:classappend="${success != null and success ? 'success-icon' : 'failed-icon'}">
+        <span th:text="${success != null and success ? '✅' : '❌'}">✅</span>
+    </div>
+
+    <!-- Result Title -->
+    <h1 class="result-title" th:classappend="${success != null and success ? 'success-title' : 'failed-title'}"
+        th:text="${success != null and success ? 'Payment Successful!' : 'Payment Failed!'}">
+        Payment Successful!
+    </h1>
+
+    <!-- Result Subtitle -->
+    <p class="result-subtitle"
+       th:text="${message != null ? message : (success != null and success ? 'Your transaction has been completed successfully.' : 'Unfortunately, your payment could not be processed.')}">
+        Your transaction has been completed successfully.
+    </p>
+
+    <!-- Payment Summary -->
+    <div class="payment-summary" th:classappend="${success != null and success ? '' : 'failed'}">
+        <h3 class="summary-title">
+            <span>📋</span>
+            Transaction Details
+        </h3>
+
+        <div class="summary-item">
+            <span class="summary-label">Status</span>
+            <span class="status-badge" th:classappend="${success != null and success ? 'success-badge' : 'failed-badge'}"
+                  th:text="${success != null and success ? 'Completed' : 'Failed'}">Completed</span>
+        </div>
+
+        <div class="summary-item" th:if="${paymentId != null}">
+            <span class="summary-label">Payment ID</span>
+            <span class="summary-value transaction-id" th:text="${paymentId}">PAY123456789</span>
+        </div>
+
+        <div class="summary-item" th:if="${orderId != null}">
+            <span class="summary-label">Order ID</span>
+            <span class="summary-value" th:text="${orderId}">ORD987654321</span>
+        </div>
+
+        <div class="summary-item" th:if="${amount != null}">
+            <span class="summary-label">Amount</span>
+            <span class="summary-value amount-value">₹<span th:text="${amount}">1,299</span></span>
+        </div>
+
+        <div class="summary-item" th:if="${transactionId != null}">
+            <span class="summary-label">Transaction ID</span>
+            <span class="summary-value transaction-id" th:text="${transactionId}">TXN456789123</span>
+        </div>
+
+        <div class="summary-item" th:if="${timestamp != null}">
+            <span class="summary-label">Date & Time</span>
+            <span class="summary-value" th:text="${timestamp}">29 Aug 2025, 04:10 AM</span>
+        </div>
+
+        <div class="summary-item" th:if="${method != null}">
+            <span class="summary-label">Payment Method</span>
+            <span class="summary-value" th:text="${method}">Credit Card</span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/" class="btn btn-primary">
+            <span>🏠</span>
+            Continue Shopping
+        </a>
+
+        <a href="/orders" class="btn btn-secondary" th:if="${success != null and success}">
+            <span>📦</span>
+            View Orders
+        </a>
+
+        <a href="/payment/retry" class="btn btn-secondary" th:if="${success == null or !success}"
+           th:href="@{/payment/retry(orderId=${orderId})}">
+            <span>🔄</span>
+            Try Again
+        </a>
+    </div>
+
+    <!-- Auto Close Notice -->
+    <div class="auto-close-notice">
+        <strong>⏰ Auto Close:</strong> This window will automatically close in
+        <span class="countdown" id="countdown">5</span> seconds
+    </div>
+
+    <!-- Footer Info -->
+    <div class="footer-info">
+        <p><strong>Need Help?</strong></p>
+        <p>Contact our support team at <strong>support@securepay.com</strong> or call <strong>1800-123-4567</strong></p>
+        <p style="margin-top: 15px; font-size: 12px; opacity: 0.8;">
+            Transaction processed by SecurePay Gateway • Secure SSL Encryption
+        </p>
+    </div>
+</div>
+
+<!-- Developer Credit Footer -->
+<div class="footer">
+    <div class="developer-credit">
+        <p>Developed by</p>
+        <a class="github-link" href="https://github.com/myselfavaneesh" target="_blank">
+            <svg class="github-icon" fill="currentColor" height="16" viewBox="0 0 16 16" width="16"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+            </svg>
+            <span>Avaneesh Jaiswal (AJ)</span>
+        </a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Get data from Thymeleaf with fallbacks
+    var success = /*[[${success}]]*/ getUrlParam('success') === 'true';
+    var message = /*[[${message}]]*/ getUrlParam('message') || 'Transaction completed';
+    var orderId = /*[[${orderId}]]*/ getUrlParam('orderId') || 'N/A';
+    var paymentId = /*[[${paymentId}]]*/ getUrlParam('paymentId') || 'N/A';
+    var amount = /*[[${amount}]]*/ getUrlParam('amount') || '0';
+
+    // Function to get URL parameters
+    function getUrlParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // Auto close countdown
+    function startCountdown() {
+        let seconds = 5;
+        const countdownElement = document.getElementById('countdown');
+
+        if (!countdownElement) return;
+
+        const interval = setInterval(function() {
+            seconds--;
+            countdownElement.textContent = seconds;
+
+            if (seconds <= 0) {
+                clearInterval(interval);
+                closeWindow();
+            }
+        }, 1000);
+    }
+
+    function closeWindow() {
+        // Send result to parent window
+        if (window.opener) {
+            try {
+                window.opener.postMessage({
+                    type: 'PAYMENT_RESULT',
+                    status: success ? 'SUCCESS' : 'FAILED',
+                    message: message,
+                    orderId: orderId,
+                    paymentId: paymentId,
+                    amount: amount
+                }, "*");
+            } catch (e) {
+                console.log('Could not send message to parent:', e);
+            }
+        }
+
+        // Close window or redirect
+        try {
+            window.close();
+        } catch (e) {
+            console.log('Could not close window, redirecting to home');
+            window.location.href = '/';
+        }
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update page dynamically if using URL parameters
+        if (window.location.search) {
+            updatePageFromParams();
+        }
+
+        startCountdown();
+    });
+
+    // Update page content from URL parameters
+    function updatePageFromParams() {
+        const success = getUrlParam('success') === 'true';
+        const message = getUrlParam('message');
+        const orderId = getUrlParam('orderId');
+        const paymentId = getUrlParam('paymentId');
+        const amount = getUrlParam('amount');
+
+        // Update body class
+        document.body.className = success ? 'success-bg' : 'failure-bg';
+
+        // Update container class
+        const container = document.querySelector('.result-container');
+        if (container) {
+            container.className = success ? 'result-container success' : 'result-container failed';
+        }
+
+        // Update icon
+        const statusIcon = document.querySelector('.status-icon');
+        if (statusIcon) {
+            statusIcon.className = success ? 'status-icon success-icon' : 'status-icon failed-icon';
+            statusIcon.querySelector('span').textContent = success ? '✅' : '❌';
+        }
+
+        // Update title
+        const title = document.querySelector('.result-title');
+        if (title) {
+            title.className = success ? 'result-title success-title' : 'result-title failed-title';
+            title.textContent = success ? 'Payment Successful!' : 'Payment Failed!';
+        }
+
+        // Update subtitle
+        const subtitle = document.querySelector('.result-subtitle');
+        if (subtitle) {
+            subtitle.textContent = message || (success ? 'Your transaction has been completed successfully.' : 'Unfortunately, your payment could not be processed.');
+        }
+
+        // Update status badge
+        const statusBadge = document.querySelector('.status-badge');
+        if (statusBadge) {
+            statusBadge.className = success ? 'status-badge success-badge' : 'status-badge failed-badge';
+            statusBadge.textContent = success ? 'COMPLETED' : 'FAILED';
+        }
+
+        // Update payment summary border
+        const summary = document.querySelector('.payment-summary');
+        if (summary) {
+            summary.className = success ? 'payment-summary' : 'payment-summary failed';
+        }
+    }
+
+    // Handle escape key to close
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeWindow();
+        }
+    });
+
+    // Handle visibility change (when user switches tabs)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            // Page became visible again, restart countdown if needed
+            const countdownElement = document.getElementById('countdown');
+            if (countdownElement && parseInt(countdownElement.textContent) > 0) {
+                startCountdown();
+            }
+        }
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,13 +1,12 @@
 package com.yodha.e_com.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.bson.types.ObjectId;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-
 @Data
-public class CartItemRequestDto {
+public class ItemRequestDto {
     @NotNull(message = "ProductId is required")
     private ObjectId productId;
 

@@ -2,8 +2,8 @@ package com.yodha.e_com.services;
 
 import com.yodha.e_com.dto.ProductRequest;
 import com.yodha.e_com.dto.ProductResponse;
+import com.yodha.e_com.entities.Product;
 import com.yodha.e_com.entities.ProductCategory;
-import com.yodha.e_com.entities.Products;
 import com.yodha.e_com.exception.ResourceNotFoundException;
 import com.yodha.e_com.mapper.ProductMapper;
 import com.yodha.e_com.repository.ProductCategoryRepo;
@@ -31,17 +31,17 @@ public class ProductServices {
 
 
     public ProductResponse createProduct(ProductRequest request) {
-        Products product = productMapper.toProduct(request);
+        Product product = productMapper.toProduct(request);
         ProductCategory category = categoryRepository.findByName(request.getCategoryName()).
                 orElseThrow(() -> new ResourceNotFoundException("Category not found with name: " + request.getCategoryName()));
         product.setCategory(category);
-        Products savedProduct = productRepo.save(product);
+        Product savedProduct = productRepo.save(product);
         return productMapper.toResponse(savedProduct);
     }
 
 
 public List<ProductResponse> getAllProducts(String categoryName, Double minPrice, Double maxPrice) {
-    List<Products> products;
+    List<Product> products;
     if (categoryName != null) {
         ProductCategory category = categoryRepository.findByName(categoryName)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + categoryName));
@@ -59,14 +59,14 @@ public List<ProductResponse> getAllProducts(String categoryName, Double minPrice
         products = productRepo.findAll();
     }
     List<ProductResponse> responses = new ArrayList<>();
-    for (Products product : products) {
+    for (Product product : products) {
         responses.add(productMapper.toResponse(product));
     }
     return responses;
 }
 
     public ProductResponse getProductById(ObjectId id) {
-        Products product = productRepo.findById(id)
+        Product product = productRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return productMapper.toResponse(product);
     }
@@ -79,7 +79,7 @@ public List<ProductResponse> getAllProducts(String categoryName, Double minPrice
     }
 
     public ProductResponse updateProduct(ObjectId id, ProductRequest request) {
-        Products existingProduct = productRepo.findById(id)
+        Product existingProduct = productRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         productMapper.updateProductFromRequest(request, existingProduct);
@@ -90,7 +90,7 @@ public List<ProductResponse> getAllProducts(String categoryName, Double minPrice
             existingProduct.setCategory(category);
         }
 
-        Products updatedProduct = productRepo.save(existingProduct);
+        Product updatedProduct = productRepo.save(existingProduct);
         return productMapper.toResponse(updatedProduct);
     }
 

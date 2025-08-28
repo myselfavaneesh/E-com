@@ -1,6 +1,5 @@
 package com.yodha.e_com.controller;
 
-import com.yodha.e_com.dto.CartItemResponseDto;
 import com.yodha.e_com.dto.CartRequestDto;
 import com.yodha.e_com.dto.CartResponseDto;
 import com.yodha.e_com.services.CartService;
