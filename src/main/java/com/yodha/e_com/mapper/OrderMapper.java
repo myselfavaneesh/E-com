@@ -15,10 +15,12 @@ import org.mapstruct.Mapping;
 public interface OrderMapper {
     @Mapping(target = "items", ignore = true)
     @Mapping(target = "paymentUrl", ignore = true)
+    @Mapping(target = "paymentId", expression = "java(order.getPaymentId() != null ? order.getPaymentId().toString() : null)")
     OrderResponseDTO toOrderResponseDTO(Order order);
 
     ItemResponseDto toItemResponseDto(OrderItem item);
 
+    @Mapping(target = "orderId", expression = "java(orderStatus.getOrderId() != null ? orderStatus.getOrderId().toString() : null)")
     OrderStatusResponseDTO toOrderStatusResponseDTO(OrderStatus orderStatus);
 
 }
