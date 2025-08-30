@@ -18,6 +18,6 @@ public class Payment {
     }
 
     public enum Status {
-        PENDING, COMPLETED, FAILED, REFUNDED,CANCELLED
+        PENDING, COMPLETED, FAILED, REFUNDED, CANCELLED
     }
 }

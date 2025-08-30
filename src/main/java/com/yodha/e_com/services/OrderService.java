@@ -8,7 +8,6 @@ import com.yodha.e_com.mapper.PaymentRepository;
 import com.yodha.e_com.repository.OrderRepository;
 import com.yodha.e_com.repository.OrderStatusRepository;
 import com.yodha.e_com.repository.ProductRepo;
-import com.yodha.e_com.repository.UserRepo;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +26,7 @@ public class OrderService {
     private final OrderStatusRepository orderStatusRepository;
 
     public OrderService(OrderRepository orderRepository, ProductRepo productRepo, OrderMapper orderMapper, PaymentRepository paymentRepository
-    , OrderStatusRepository orderStatusRepository) {
+            , OrderStatusRepository orderStatusRepository) {
         this.orderRepository = orderRepository;
         this.productRepo = productRepo;
         this.paymentRepository = paymentRepository;
@@ -133,7 +132,7 @@ public class OrderService {
         return orderMapper.toOrderStatusResponseDTO(orderStatusOpt.get());
     }
 
-    public void cancelOrder(ObjectId Id,String email) {
+    public void cancelOrder(ObjectId Id, String email) {
         Optional<Order> orderOpt = orderRepository.findById(Id);
 
         if (orderOpt.isEmpty()) {
