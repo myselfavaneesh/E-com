@@ -15,4 +15,5 @@ public class OrderResponseDTO {
     private String paymentId;
     private List<ItemResponseDto> items;
     private String paymentUrl;
+    private String trackingNumber;
 }

@@ -23,7 +23,6 @@ public class ProductController {
     }
 
 
-
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody ProductRequest productRequest) {
@@ -41,12 +40,12 @@ public class ProductController {
 
     @GetMapping()
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getProducts(@RequestParam(required = false) String categoryName,
-                                                                           @RequestParam(required = false) Double minPrice,
-                                                                           @RequestParam(required = false) Double maxPrice) {
+                                                                          @RequestParam(required = false) Double minPrice,
+                                                                          @RequestParam(required = false) Double maxPrice) {
 
         List<ProductResponse> product = productService.getAllProducts(categoryName, minPrice, maxPrice);
 
-        ApiResponse< List<ProductResponse>> response = new ApiResponse<>(
+        ApiResponse<List<ProductResponse>> response = new ApiResponse<>(
                 true,
                 "Product fetched successfully",
                 product

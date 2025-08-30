@@ -3,9 +3,6 @@ package com.yodha.e_com.entities;
 import lombok.Data;
 import org.bson.types.ObjectId;
 
-
-import java.util.List;
-
 @Data
 public class CartItem {
     private ObjectId productId;

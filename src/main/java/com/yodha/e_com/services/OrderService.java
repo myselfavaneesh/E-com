@@ -1,43 +1,41 @@
 package com.yodha.e_com.services;
 
-import com.yodha.e_com.dto.ItemRequestDto;
-import com.yodha.e_com.dto.ItemResponseDto;
-import com.yodha.e_com.dto.OrderRequestDTO;
-import com.yodha.e_com.dto.OrderResponseDTO;
-import com.yodha.e_com.entities.Order;
-import com.yodha.e_com.entities.OrderItem;
-import com.yodha.e_com.entities.Payment;
-import com.yodha.e_com.entities.Product;
+import com.yodha.e_com.dto.*;
+import com.yodha.e_com.entities.*;
 import com.yodha.e_com.exception.ResourceNotFoundException;
 import com.yodha.e_com.mapper.OrderMapper;
 import com.yodha.e_com.mapper.PaymentRepository;
 import com.yodha.e_com.repository.OrderRepository;
+import com.yodha.e_com.repository.OrderStatusRepository;
 import com.yodha.e_com.repository.ProductRepo;
 import com.yodha.e_com.repository.UserRepo;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final UserRepo userRepo;
     private final ProductRepo productRepo;
     private final OrderMapper orderMapper;
     private final PaymentRepository paymentRepository;
+    private final OrderStatusRepository orderStatusRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepo userRepo, ProductRepo productRepo, OrderMapper orderMapper, PaymentRepository paymentRepository) {
+    public OrderService(OrderRepository orderRepository, ProductRepo productRepo, OrderMapper orderMapper, PaymentRepository paymentRepository
+    , OrderStatusRepository orderStatusRepository) {
         this.orderRepository = orderRepository;
-        this.userRepo = userRepo;
         this.productRepo = productRepo;
         this.paymentRepository = paymentRepository;
         this.orderMapper = orderMapper;
+        this.orderStatusRepository = orderStatusRepository;
     }
 
-    public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO, String email) {
+    public OrderResponseDTO placeOrder(OrderRequestDTO orderRequestDTO, String email) {
         Order order = new Order();
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -54,10 +52,8 @@ public class OrderService {
             orderItem.setProductName(product.getName());
             orderItem.setQuantity(itemDto.getQuantity());
             orderItem.setPrice(product.getPrice());
-
             orderItems.add(orderItem);
 
-            // Deduct stock and save product
             product.setStock(product.getStock() - itemDto.getQuantity());
             productRepo.save(product);
         }
@@ -80,9 +76,21 @@ public class OrderService {
         payment.setStatus(Payment.Status.PENDING);
         payment = paymentRepository.save(payment);
         order.setPaymentId(payment.getId());
+
+        String trackingNumber = "TRACK" + new ObjectId().toString().substring(0, 8).toUpperCase();
+        order.setTrackingNumber(trackingNumber);
+
         Order savedOrder = orderRepository.save(order);
+
         payment.setOrderId(savedOrder.getId());
         paymentRepository.save(payment);
+
+        OrderStatus orderStatus = new OrderStatus();
+        orderStatus.setOrderId(savedOrder.getId());
+        orderStatus.setTrackingNumber(trackingNumber);
+        orderStatus.setStatus(savedOrder.getStatus().name());
+        orderStatus.setUpdatedAt(LocalDateTime.now());
+        orderStatusRepository.save(orderStatus);
 
         List<ItemResponseDto> itemResponseDtos = savedOrder.getItems()
                 .stream()
@@ -91,17 +99,19 @@ public class OrderService {
 
         OrderResponseDTO orderResponseDTO = orderMapper.toOrderResponseDTO(savedOrder);
         orderResponseDTO.setItems(itemResponseDtos);
-        orderResponseDTO.setPaymentUrl(
-                String.format("http://localhost:8080/api/v1/payments/mock/%s",
-                        savedOrder.getPaymentId() != null ? savedOrder.getPaymentId().toString() : "")
-        );
+        if (savedOrder.getStatus() == Order.Status.PENDING) {
+            orderResponseDTO.setPaymentUrl(
+                    String.format("http://localhost:8080/api/v1/payments/mock/%s",
+                            savedOrder.getPaymentId() != null ? savedOrder.getPaymentId().toString() : "")
+            );
+        }
         return orderResponseDTO;
     }
 
     public List<OrderResponseDTO> getOrdersByUser(String email) {
         List<Order> orders = orderRepository.findByEmail(email);
         if (orders.isEmpty()) {
-           throw  new ResourceNotFoundException("No orders found for user with email: " + email);
+            throw new ResourceNotFoundException("No orders found for user with email: " + email);
         }
 
         return orders.stream().map(order -> {
@@ -114,4 +124,53 @@ public class OrderService {
             return orderResponseDTO;
         }).toList();
     }
+
+    public OrderStatusResponseDTO trackOrder(String trackingNumber) {
+        Optional<OrderStatus> orderStatusOpt = orderStatusRepository.findByTrackingNumber(trackingNumber);
+        if (orderStatusOpt.isEmpty()) {
+            throw new ResourceNotFoundException("No order found with tracking number: " + trackingNumber);
+        }
+        return orderMapper.toOrderStatusResponseDTO(orderStatusOpt.get());
+    }
+
+    public void cancelOrder(ObjectId Id,String email) {
+        Optional<Order> orderOpt = orderRepository.findById(Id);
+
+        if (orderOpt.isEmpty()) {
+            throw new ResourceNotFoundException("No order found with ID: " + Id);
+        } else if (orderOpt.get().getStatus() == Order.Status.CANCELLED) {
+            throw new RuntimeException("Order is already cancelled");
+        } else if (!orderOpt.get().getEmail().equals(email)) {
+            throw new RuntimeException("You are not authorized to cancel this order");
+        } else if (orderOpt.get().getStatus() == Order.Status.DELIVERED) {
+            throw new RuntimeException("Delivered orders cannot be cancelled");
+        }
+
+        orderOpt.get().setStatus(Order.Status.CANCELLED);
+        paymentRepository.findById(orderOpt.get().getPaymentId()).ifPresent(
+                payment -> {
+                    payment.setStatus(Payment.Status.CANCELLED);
+                    paymentRepository.save(payment);
+                }
+        );
+        orderRepository.save(orderOpt.get());
+    }
+
+    public void updateOrderStatus(ObjectId orderId, Order.Status status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("No order found with ID: " + orderId));
+        if (!java.util.Arrays.asList(Order.Status.values()).contains(status)) {
+            throw new IllegalArgumentException("Invalid order status: " + status);
+        }
+
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        OrderStatus orderStatus = new OrderStatus();
+        orderStatus.setOrderId(order.getId());
+        orderStatus.setTrackingNumber(order.getTrackingNumber());
+        orderStatus.setStatus(status.name());
+        orderStatus.setUpdatedAt(LocalDateTime.now());
+        orderStatusRepository.save(orderStatus);
+    } //Admin Level
 }

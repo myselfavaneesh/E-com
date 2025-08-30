@@ -7,7 +7,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface ProductRepo extends MongoRepository <Product, ObjectId> {
+public interface ProductRepo extends MongoRepository<Product, ObjectId> {
     List<Product> findByPriceBetween(Double minPrice, Double maxPrice);
+
     List<Product> findByCategory(ProductCategory category);
 }

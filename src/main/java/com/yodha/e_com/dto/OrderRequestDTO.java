@@ -1,6 +1,5 @@
 package com.yodha.e_com.dto;
 
-import com.yodha.e_com.entities.Payment;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;

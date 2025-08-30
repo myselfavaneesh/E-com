@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 
 
@@ -40,15 +41,15 @@ public class UserServices {
     private UserMapper usersMapper;
 
 
-    public void createUser(UsersRequest request){
-            userRepo.findByEmail(request.getEmail()).ifPresent(user -> {
-                throw new ResourceNotFoundException("Email is already in use!");
-            });
+    public void createUser(UsersRequest request) {
+        userRepo.findByEmail(request.getEmail()).ifPresent(user -> {
+            throw new ResourceNotFoundException("Email is already in use!");
+        });
 
-            Users user = usersMapper.toUsers(request);
+        Users user = usersMapper.toUsers(request);
 
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            userRepo.save(user);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepo.save(user);
     }
 
     public ResponseEntity<?> loginUser(String email, String password) {
@@ -59,8 +60,7 @@ public class UserServices {
 
             AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
 
-            String jwtToken = jwtUtility.generateToken(userDetails.getUsername(),userDetails.getRoles());
-
+            String jwtToken = jwtUtility.generateToken(userDetails.getUsername(), userDetails.getRoles());
 
 
             ResponseCookie jwtCookie = ResponseCookie.from("JWT-TOKEN", jwtToken)
@@ -81,7 +81,7 @@ public class UserServices {
         }
     }
 
-    public ResponseEntity<String> updateUser(String name ,String password, String currentUserEmail ){
+    public ResponseEntity<String> updateUser(String name, String password, String currentUserEmail) {
         try {
             Users user = userRepo.findByEmail(currentUserEmail)
                     .orElseThrow(() -> new RuntimeException("User not found"));

@@ -499,7 +499,7 @@
                 }
 
                 // Alternative approach - force close after timeout
-                setTimeout(function() {
+                setTimeout(function () {
                     if (window.opener) {
                         window.close();
                     } else {
@@ -513,7 +513,7 @@
 
     // Alternative auto-close using setTimeout (backup method)
     function autoCloseWindow() {
-        setTimeout(function() {
+        setTimeout(function () {
             try {
                 window.close();
             } catch (e) {

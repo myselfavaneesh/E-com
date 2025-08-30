@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UsersRequest request){
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UsersRequest request) {
         userServices.createUser(request);
 
         ApiResponse<String> response = new ApiResponse<>(
@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest user){
+    public ResponseEntity<?> login(@RequestBody LoginRequest user) {
         return userServices.loginUser(user.getEmail(), user.getPassword());
     }
 

@@ -1,4 +1,4 @@
- package com.yodha.e_com.services;
+package com.yodha.e_com.services;
 
 import com.yodha.e_com.dto.CategoryRequest;
 import com.yodha.e_com.entities.ProductCategory;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
- @Service
+@Service
 public class CategoryServices {
 
     @Autowired
@@ -37,7 +37,7 @@ public class CategoryServices {
         return categoryRepo.findAll();
     }
 
-    public ProductCategory updateCategory(CategoryRequest request ,String categoryName) {
+    public ProductCategory updateCategory(CategoryRequest request, String categoryName) {
         ProductCategory existingCategory = categoryRepo.findByName(categoryName)
                 .orElseThrow(() -> new RuntimeException("Category not found with name: " + categoryName));
         existingCategory.setName(request.getName());

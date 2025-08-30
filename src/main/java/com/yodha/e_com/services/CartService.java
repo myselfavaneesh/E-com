@@ -101,64 +101,64 @@ public class CartService {
     }
 
     public CartResponseDto removeItemFromCart(String email, ObjectId productId) {
-    Cart cart = cartRepo.findByEmail(email)
-            .orElseThrow(() -> new ResourceNotFoundException("Cart not found for email: " + email));
+        Cart cart = cartRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for email: " + email));
 
-    List<CartItem> cartItems = cart.getCartItems();
-    if (cartItems != null) {
-        for (int i = 0; i < cartItems.size(); i++) {
-            CartItem item = cartItems.get(i);
-            if (item.getProductId().equals(productId)) {
+        List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems != null) {
+            for (int i = 0; i < cartItems.size(); i++) {
+                CartItem item = cartItems.get(i);
+                if (item.getProductId().equals(productId)) {
                     cartItems.remove(i);
                     break;
+                }
             }
         }
-    }
 
-    double totalPrice = cartItems == null ? 0.0 :
-            cartItems.stream()
-                    .mapToDouble(item -> item.getPrice() * item.getQuantity())
-                    .sum();
-    cart.setCartItems(cartItems);
-    cart.setTotalPrice(totalPrice);
-    Cart updatedCart = cartRepo.save(cart);
-    return cartMapper.toCartResponseDto(updatedCart)
-    ;
-}
+        double totalPrice = cartItems == null ? 0.0 :
+                cartItems.stream()
+                        .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                        .sum();
+        cart.setCartItems(cartItems);
+        cart.setTotalPrice(totalPrice);
+        Cart updatedCart = cartRepo.save(cart);
+        return cartMapper.toCartResponseDto(updatedCart)
+                ;
+    }
 
     public CartResponseDto updateCart(String email, ObjectId productId, int quantity) {
-    if (quantity != 1 && quantity != -1) {
+        if (quantity != 1 && quantity != -1) {
             throw new IllegalArgumentException("Quantity must be either 1 (increment) or -1 (decrement).");
         }
-    Cart cart = cartRepo.findByEmail(email)
-            .orElseThrow(() -> new ResourceNotFoundException("Cart not found for email: " + email));
+        Cart cart = cartRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for email: " + email));
 
 
-    List<CartItem> cartItems = cart.getCartItems();
-    if (cartItems != null) {
-        for (int i = 0; i < cartItems.size(); i++) {
-            CartItem item = cartItems.get(i);
-            if (item.getProductId().equals(productId)) {
-                int newQuantity = item.getQuantity() + quantity;
-                if (newQuantity > 0) {
-                    item.setQuantity(newQuantity);
-                } else {
-                    cartItems.remove(i);
+        List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems != null) {
+            for (int i = 0; i < cartItems.size(); i++) {
+                CartItem item = cartItems.get(i);
+                if (item.getProductId().equals(productId)) {
+                    int newQuantity = item.getQuantity() + quantity;
+                    if (newQuantity > 0) {
+                        item.setQuantity(newQuantity);
+                    } else {
+                        cartItems.remove(i);
+                    }
+                    break;
                 }
-                break;
             }
+        } else {
+            throw new ResourceNotFoundException("No items in cart to update.");
         }
-    }else {
-        throw new ResourceNotFoundException("No items in cart to update.");
-    }
-    double totalPrice = cartItems.stream()
-            .mapToDouble(item -> item.getPrice() * item.getQuantity())
-            .sum();
+        double totalPrice = cartItems.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
 
-    cart.setCartItems(cartItems);
-    cart.setTotalPrice(totalPrice);
-    Cart updatedCart = cartRepo.save(cart);
-    return cartMapper.toCartResponseDto(updatedCart);
-}
+        cart.setCartItems(cartItems);
+        cart.setTotalPrice(totalPrice);
+        Cart updatedCart = cartRepo.save(cart);
+        return cartMapper.toCartResponseDto(updatedCart);
+    }
 
 }

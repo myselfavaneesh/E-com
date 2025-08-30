@@ -1,10 +1,12 @@
 package com.yodha.e_com.mapper;
 
-import com.yodha.e_com.dto.ItemRequestDto;
 import com.yodha.e_com.dto.CartResponseDto;
+import com.yodha.e_com.dto.ItemRequestDto;
 import com.yodha.e_com.entities.Cart;
 import com.yodha.e_com.entities.CartItem;
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 
 @Mapper(componentModel = "spring")

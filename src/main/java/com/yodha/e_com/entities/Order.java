@@ -22,8 +22,9 @@ public class Order {
     private LocalDateTime deliveryDate;
     private String shippingAddress;
     private ObjectId paymentId;
+    private String trackingNumber;
 
     public enum Status {
-        PENDING, SHIPPED, DELIVERED, CONFIRMED, FAILED,CANCELLED
+        PENDING, SHIPPED, DELIVERED, CONFIRMED, FAILED, CANCELLED
     }
 }

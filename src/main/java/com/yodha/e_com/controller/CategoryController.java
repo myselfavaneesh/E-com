@@ -57,7 +57,7 @@ public class CategoryController {
 
     @PutMapping("/{categoryName}")
     public ResponseEntity<ApiResponse<ProductCategory>> updateCategory(@Valid @RequestBody CategoryRequest categoryRequest, @PathVariable String categoryName) {
-        ProductCategory updatedCategory = categoryServices.updateCategory(categoryRequest,categoryName);
+        ProductCategory updatedCategory = categoryServices.updateCategory(categoryRequest, categoryName);
         ApiResponse<ProductCategory> response = new ApiResponse<>(
                 true,
                 "Category updated successfully",

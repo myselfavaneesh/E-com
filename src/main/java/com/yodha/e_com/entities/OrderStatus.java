@@ -6,16 +6,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-@Document(collection = "carts")
-public class Cart {
+@Document(collection = "order_status")
+public class OrderStatus {
     @Id
-    private ObjectId id;
-    private String email;
-    private List<CartItem> cartItems;
-    private double totalPrice;
-    private LocalDateTime createdAt;
+    private ObjectId Id;
+    private String trackingNumber;
+    private ObjectId orderId;
+    private String status;
     private LocalDateTime updatedAt;
 }

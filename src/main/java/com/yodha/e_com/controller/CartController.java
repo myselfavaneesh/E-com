@@ -19,16 +19,16 @@ public class CartController {
     private CartService cartService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CartResponseDto>> createCart(@Valid @RequestBody CartRequestDto cartRequestDto ) {
+    public ResponseEntity<ApiResponse<CartResponseDto>> createCart(@Valid @RequestBody CartRequestDto cartRequestDto) {
         String Email = SecurityContextHolder.getContext().getAuthentication().getName();
-        CartResponseDto savedCart= cartService.createCart(Email,cartRequestDto);
+        CartResponseDto savedCart = cartService.createCart(Email, cartRequestDto);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cart Created", savedCart));
     }
 
     @GetMapping
-    public   ResponseEntity<ApiResponse<CartResponseDto>> getCart() {
+    public ResponseEntity<ApiResponse<CartResponseDto>> getCart() {
         String Email = SecurityContextHolder.getContext().getAuthentication().getName();
-        CartResponseDto cart= cartService.getCartByEmail(Email);
+        CartResponseDto cart = cartService.getCartByEmail(Email);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cart Fetched", cart));
     }
 
@@ -40,14 +40,14 @@ public class CartController {
     }
 
     @PatchMapping("/{productId}/{quantity}")
-    public ResponseEntity<ApiResponse<CartResponseDto>> updateCartItem(@PathVariable ObjectId productId, @PathVariable int quantity  ) {
+    public ResponseEntity<ApiResponse<CartResponseDto>> updateCartItem(@PathVariable ObjectId productId, @PathVariable int quantity) {
         String Email = SecurityContextHolder.getContext().getAuthentication().getName();
         CartResponseDto updatedCart = cartService.updateCart(Email, productId, quantity);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cart Item Updated", updatedCart));
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<ApiResponse<CartResponseDto>> removeCartItem(@PathVariable ObjectId productId ) {
+    public ResponseEntity<ApiResponse<CartResponseDto>> removeCartItem(@PathVariable ObjectId productId) {
         String Email = SecurityContextHolder.getContext().getAuthentication().getName();
         CartResponseDto removedItem = cartService.removeItemFromCart(Email, productId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Cart Item Removed", removedItem));

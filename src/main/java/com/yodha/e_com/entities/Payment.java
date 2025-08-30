@@ -14,10 +14,10 @@ public class Payment {
     private Status status;
 
     public enum Method {
-        CREDIT_CARD, DEBIT_CARD, UPI, BANK_TRANSFER, COD;
+        CREDIT_CARD, DEBIT_CARD, UPI, BANK_TRANSFER, COD
     }
 
     public enum Status {
-        PENDING, COMPLETED, FAILED, REFUNDED
+        PENDING, COMPLETED, FAILED, REFUNDED,CANCELLED
     }
 }
