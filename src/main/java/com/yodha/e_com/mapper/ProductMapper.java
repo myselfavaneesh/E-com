@@ -16,6 +16,7 @@ public interface ProductMapper {
     Product toProduct(ProductRequest dto);
 
     @Mapping(source = "category.name", target = "categoryName")
+    @Mapping(target = "id", expression = "java(product.getId() != null ? product.getId().toString() : null)")
     ProductResponse toResponse(Product product);
 
     @Mapping(source = "categoryName", target = "category", ignore = true)

@@ -34,10 +34,8 @@ public class ProductServices {
         ProductCategory category = categoryRepository.findByName(request.getCategoryName()).
                 orElseThrow(() -> new ResourceNotFoundException("Category not found with name: " + request.getCategoryName()));
         product.setCategory(category);
-        Product savedProduct = productRepo.save(product);
-        return productMapper.toResponse(savedProduct);
+        return productMapper.toResponse(productRepo.save(product));
     }
-
 
     public List<ProductResponse> getAllProducts(String categoryName, Double minPrice, Double maxPrice) {
         List<Product> products;

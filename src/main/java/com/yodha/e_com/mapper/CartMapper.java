@@ -2,10 +2,12 @@ package com.yodha.e_com.mapper;
 
 import com.yodha.e_com.dto.CartResponseDto;
 import com.yodha.e_com.dto.ItemRequestDto;
+import com.yodha.e_com.dto.ItemResponseDto;
 import com.yodha.e_com.entities.Cart;
 import com.yodha.e_com.entities.CartItem;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 
@@ -16,6 +18,9 @@ public interface CartMapper {
 
 
     CartResponseDto toCartResponseDto(Cart cart);
+
+    @Mapping(target = "id", expression = "java(String.valueOf(cartItem.getProductId()))")
+    ItemResponseDto toItemResponseDto(CartItem cartItem);
 
     @AfterMapping
     default void calculateTotalPrice(@MappingTarget Cart cart) {

@@ -16,8 +16,11 @@ public interface OrderMapper {
     @Mapping(target = "items", ignore = true)
     @Mapping(target = "paymentUrl", ignore = true)
     @Mapping(target = "paymentId", expression = "java(order.getPaymentId() != null ? order.getPaymentId().toString() : null)")
+    @Mapping(target = "id", expression = "java(order.getId() != null ? order.getId().toString() : null)")
     OrderResponseDTO toOrderResponseDTO(Order order);
 
+    @Mapping(target = "id", expression = "java(item.getProductId() != null ? item.getProductId().toString() : null)")
+    @Mapping(target = "image", ignore = true)
     ItemResponseDto toItemResponseDto(OrderItem item);
 
     @Mapping(target = "orderId", expression = "java(orderStatus.getOrderId() != null ? orderStatus.getOrderId().toString() : null)")

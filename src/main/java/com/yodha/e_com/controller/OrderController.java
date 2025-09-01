@@ -3,6 +3,7 @@ package com.yodha.e_com.controller;
 import com.yodha.e_com.dto.OrderRequestDTO;
 import com.yodha.e_com.dto.OrderResponseDTO;
 import com.yodha.e_com.dto.OrderStatusResponseDTO;
+import com.yodha.e_com.entities.Order;
 import com.yodha.e_com.services.OrderService;
 import com.yodha.e_com.utils.ApiResponse;
 import jakarta.validation.Valid;
@@ -31,7 +32,7 @@ public class OrderController {
 
     @GetMapping("/{trackingNumber}")
     public ResponseEntity<ApiResponse<OrderStatusResponseDTO>> getOrderByTrackingNumber(@PathVariable String trackingNumber) {
-        return ResponseEntity.ok(new ApiResponse<>(true, "Order fetched successfully", orderService.trackOrder(trackingNumber)));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Order Location Fetched", orderService.trackOrder(trackingNumber)));
     }
 
     @GetMapping()
@@ -45,5 +46,11 @@ public class OrderController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         orderService.cancelOrder(new ObjectId(orderId), email);
         return ResponseEntity.ok(new ApiResponse<>(true, "Order cancelled successfully", null));
+    }
+
+    @PatchMapping("/{orderId}/{status}")
+    public ResponseEntity<ApiResponse<String>> updateOrderStatus(@PathVariable String orderId, @PathVariable String status) {
+        orderService.updateOrderStatus(new ObjectId(orderId), Order.Status.valueOf(status));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Order status updated successfully", null));
     }
 }

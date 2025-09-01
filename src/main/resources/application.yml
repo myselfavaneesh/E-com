@@ -6,6 +6,23 @@ Spring:
       database: e_com
       auto-index-creation: true
 
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+
 server:
   port: 8080
   servlet:
@@ -16,4 +33,3 @@ server:
 jwt:
   secret: mysecretkeymysecretkeymysecretkey
   expiration: 3600000
-

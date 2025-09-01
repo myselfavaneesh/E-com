@@ -8,6 +8,7 @@ import com.yodha.e_com.mapper.PaymentRepository;
 import com.yodha.e_com.repository.OrderRepository;
 import com.yodha.e_com.repository.OrderStatusRepository;
 import com.yodha.e_com.repository.ProductRepo;
+import com.yodha.e_com.utils.Mail;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -24,14 +25,16 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final PaymentRepository paymentRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final Mail mail;
 
     public OrderService(OrderRepository orderRepository, ProductRepo productRepo, OrderMapper orderMapper, PaymentRepository paymentRepository
-            , OrderStatusRepository orderStatusRepository) {
+            , OrderStatusRepository orderStatusRepository, Mail mail) {
         this.orderRepository = orderRepository;
         this.productRepo = productRepo;
         this.paymentRepository = paymentRepository;
         this.orderMapper = orderMapper;
         this.orderStatusRepository = orderStatusRepository;
+        this.mail = mail;
     }
 
     public OrderResponseDTO placeOrder(OrderRequestDTO orderRequestDTO, String email) {
@@ -46,12 +49,22 @@ public class OrderService {
                 throw new IllegalArgumentException("Insufficient stock for product: " + product.getName());
             }
 
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(product.getId());
-            orderItem.setProductName(product.getName());
-            orderItem.setQuantity(itemDto.getQuantity());
-            orderItem.setPrice(product.getPrice());
-            orderItems.add(orderItem);
+            // Check if the product already exists in orderItems
+            OrderItem existingOrderItem = orderItems.stream()
+                    .filter(item -> item.getProductId().equals(product.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingOrderItem != null) {
+                existingOrderItem.setQuantity(existingOrderItem.getQuantity() + itemDto.getQuantity());
+            } else {
+                OrderItem orderItem = new OrderItem();
+                orderItem.setProductId(product.getId());
+                orderItem.setProductName(product.getName());
+                orderItem.setQuantity(itemDto.getQuantity());
+                orderItem.setPrice(product.getPrice());
+                orderItems.add(orderItem);
+            }
 
             product.setStock(product.getStock() - itemDto.getQuantity());
             productRepo.save(product);
@@ -91,21 +104,25 @@ public class OrderService {
         orderStatus.setUpdatedAt(LocalDateTime.now());
         orderStatusRepository.save(orderStatus);
 
-        List<ItemResponseDto> itemResponseDtos = savedOrder.getItems()
-                .stream()
+        List<ItemResponseDto> itemResponse = savedOrder.getItems().stream()
                 .map(orderMapper::toItemResponseDto)
                 .toList();
 
         OrderResponseDTO orderResponseDTO = orderMapper.toOrderResponseDTO(savedOrder);
-        orderResponseDTO.setItems(itemResponseDtos);
+        orderResponseDTO.setItems(itemResponse);
         if (savedOrder.getStatus() == Order.Status.PENDING) {
             orderResponseDTO.setPaymentUrl(
                     String.format("http://localhost:8080/api/v1/payments/mock/%s",
                             savedOrder.getPaymentId() != null ? savedOrder.getPaymentId().toString() : "")
             );
         }
+
+        mail.sendEmail(email, "Order Placed Successfully",
+                "Your order has been placed successfully. Your tracking number is: " + trackingNumber);
+
         return orderResponseDTO;
     }
+
 
     public List<OrderResponseDTO> getOrdersByUser(String email) {
         List<Order> orders = orderRepository.findByEmail(email);
@@ -152,6 +169,13 @@ public class OrderService {
                     paymentRepository.save(payment);
                 }
         );
+        orderStatusRepository.findByTrackingNumber(orderOpt.get().getTrackingNumber()).ifPresent(
+                orderStatus -> {
+                    orderStatus.setStatus(Order.Status.CANCELLED.name());
+                    orderStatus.setUpdatedAt(LocalDateTime.now());
+                    orderStatusRepository.save(orderStatus);
+                }
+        );
         orderRepository.save(orderOpt.get());
     }
 
@@ -161,10 +185,8 @@ public class OrderService {
         if (!java.util.Arrays.asList(Order.Status.values()).contains(status)) {
             throw new IllegalArgumentException("Invalid order status: " + status);
         }
-
         order.setStatus(status);
         orderRepository.save(order);
-
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setOrderId(order.getId());
         orderStatus.setTrackingNumber(order.getTrackingNumber());

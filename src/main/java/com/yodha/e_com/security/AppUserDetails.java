@@ -53,5 +53,9 @@ public class AppUserDetails implements UserDetails {
         return user.getRoles();
     }
 
+    public Users getUser() {
+        return user;
+    }
+
 
 }

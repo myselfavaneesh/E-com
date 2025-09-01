@@ -55,45 +55,65 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable ObjectId id) {
-        ProductResponse product = productService.getProductById(id);
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable String id) {
 
-        ApiResponse<ProductResponse> response = new ApiResponse<>(
+        if (!ObjectId.isValid(id)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(
+                    false,
+                    "Invalid product ID format",
+                    null
+            ));
+        }
+
+        ProductResponse product = productService.getProductById(new ObjectId(id));
+
+        return ResponseEntity.ok(new ApiResponse<>(
                 true,
                 "Product fetched successfully",
                 product
-        );
-
-        return ResponseEntity.ok(response);
+        ));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable ObjectId id) {
-        productService.deleteProduct(id);
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable String id) {
 
-        ApiResponse<Void> response = new ApiResponse<>(
+        if (!ObjectId.isValid(id)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(
+                    false,
+                    "Invalid product ID format",
+                    null
+            ));
+        }
+
+        productService.deleteProduct(new ObjectId(id));
+
+        return ResponseEntity.ok(new ApiResponse<>(
                 true,
                 "Product deleted successfully",
                 null
-        );
-
-        return ResponseEntity.ok(response);
+        ));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
-            @PathVariable ObjectId id,
+            @PathVariable String id,
             @Valid @RequestBody ProductRequest productRequest) {
 
-        ProductResponse updatedProduct = productService.updateProduct(id, productRequest);
+        if (!ObjectId.isValid(id)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(
+                    false,
+                    "Invalid product ID format",
+                    null
+            ));
+        }
 
-        ApiResponse<ProductResponse> response = new ApiResponse<>(
+        ProductResponse updatedProduct = productService.updateProduct(new ObjectId(id), productRequest);
+
+        return ResponseEntity.ok(new ApiResponse<>(
                 true,
                 "Product updated successfully",
                 updatedProduct
-        );
-
-        return ResponseEntity.ok(response);
+        ));
     }
 
 }

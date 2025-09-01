@@ -2,6 +2,7 @@ package com.yodha.e_com.services;
 
 import com.yodha.e_com.dto.CartRequestDto;
 import com.yodha.e_com.dto.CartResponseDto;
+import com.yodha.e_com.dto.ItemResponseDto;
 import com.yodha.e_com.entities.Cart;
 import com.yodha.e_com.entities.CartItem;
 import com.yodha.e_com.entities.Product;
@@ -83,6 +84,12 @@ public class CartService {
 
         // Step 5: Save & return
         Cart saved = cartRepo.save(cart);
+        List<ItemResponseDto> itemsResponseDto = new ArrayList<>();
+
+        saved.getCartItems().forEach(cartItem -> {
+            itemsResponseDto.add(cartMapper.toItemResponseDto(cartItem));
+        });
+
         return cartMapper.toCartResponseDto(saved);
     }
 
