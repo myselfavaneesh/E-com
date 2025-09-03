@@ -95,6 +95,12 @@ public class UserServices {
         return usersMapper.toUsersResDto(user);
     }
 
+    public UsersResponsedto getUserByEmail(String email) {
+        Users user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return usersMapper.toUsersResDto(user);
+    }
+
 }
 
 
