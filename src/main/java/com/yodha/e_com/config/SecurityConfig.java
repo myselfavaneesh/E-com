@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight requests
-                        .requestMatchers("/auth/login", "/auth/user").permitAll()
+                        .requestMatchers("/auth/user/login", "/auth/user").permitAll()
                         .requestMatchers("/admin/**").hasRole("USER_ADMIN")
                         .anyRequest().authenticated()
                 )
